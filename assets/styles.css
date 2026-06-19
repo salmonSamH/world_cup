@@ -1,0 +1,10 @@
+.center-header .ag-header-cell-label {
+    justify-content: center;
+}
+
+#whole-thing {
+  display: flex;
+  flex-direction: column;   /* Stacks children vertically */
+  gap: 20px; /* Adds 20px of space between all child elements */
+  margin: 40px;
+}
