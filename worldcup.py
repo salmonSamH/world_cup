@@ -1,6 +1,6 @@
 import threading
 import time
-from dash import Dash, html, clientside_callback, Input, Output, dcc, dash
+from dash import Dash, html, clientside_callback, Input, Output, State, dcc, dash
 import dash_ag_grid as dag
 import requests
 import string
@@ -8,11 +8,15 @@ import pandas as pd
 import datetime
 from dotenv import load_dotenv
 import os
+# app.py, callbacks.py, background.py — all import from the same place
+from state import cache, cache_lock
 
 app = Dash(__name__)
 
 load_dotenv()  # reads .env into the environment
 API_KEY = os.environ["API_KEY"]
+
+still_waiting = False
 
 headers = {'x-apisports-key': API_KEY}
 payload = {'league': 1, 'season': 2026}
@@ -54,7 +58,7 @@ column_defs_fixtures = [
     {'field': 'time', 'headerName': 'Time', "width": 80},
     {'field': 'city', 'headerName': 'Location'},
     {'field': 'round', 'headerName': 'Round'},
-    {'field': 'status_short', 'headerName': 'Status', "width": 80},
+    {'field': 'status', 'headerName': 'Status', "width": 150},
     {'field': 'home', 'headerName': '', "cellRenderer": "HomeRenderer"},
     {'field': 'score', 'headerName': '', "width": 100},
     {'field': 'away', 'headerName': '', "cellRenderer": "AwayRenderer"},
@@ -64,10 +68,7 @@ dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
 }
 style_fixtures = {"height": "400px"}
-
-# Shared cache — background thread writes, callbacks read
-cache = {"standings_rows": None, "fixtures": None, "first_upcoming": None, "last_updated": None} #"first_upcoming": None,
-cache_lock = threading.Lock()
+ADDED = False
 
 # ── Background worker ──────────────────────────────────────────────
 def fetch_and_process():
@@ -93,29 +94,36 @@ def fetch_and_process():
 
             response = requests.get(url = 'https://v3.football.api-sports.io/fixtures', headers = headers, params = payload)
             fixtures = pd.json_normalize(response.json().get("response"))
-            fixtures = fixtures[['fixture.timestamp', 'fixture.venue.name', 'fixture.venue.city', 'fixture.status.long', 'fixture.status.short', 'fixture.status.elapsed', 'fixture.status.extra', 'league.name', 'league.round', 'teams.home.id', 'teams.home.name', 'teams.home.logo', 'teams.away.id', 'teams.away.name', 'teams.away.logo', 'goals.home', 'goals.away']]
-            fixtures.columns = ['timestamp', 'venue', 'city', 'status_long', 'status_short', 'elapsed', 'extra', 'league', 'round', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals']
+            fixtures = fixtures[['fixture.id', 'fixture.timestamp', 'fixture.venue.name', 'fixture.venue.city', 'fixture.status.long', 'fixture.status.short', 'fixture.status.elapsed', 'fixture.status.extra', 'league.name', 'league.round', 'teams.home.id', 'teams.home.name', 'teams.home.logo', 'teams.away.id', 'teams.away.name', 'teams.away.logo', 'goals.home', 'goals.away']]
+            fixtures.columns = ['id','timestamp', 'venue', 'city', 'status_long', 'status_short', 'elapsed', 'extra', 'league', 'round', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals']
             fixtures = fixtures.sort_values('timestamp').reset_index(drop=True)
-            fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%m/%d/%Y'))
+            fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%d'))
             fixtures['time'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%H:%M'))
             fixtures['score'] = fixtures.apply(lambda x: str(round(x['home_goals'])) + ' - ' + str(round(x['away_goals'])) if pd.notna(x['home_goals']) and pd.notna(x['away_goals']) else None, axis=1)
             fixtures['city'] = fixtures['city'].apply(lambda x: x if x not in venues.keys() else venues[x])
             fixtures['round'] = fixtures['round'].apply(lambda x: x if x not in rounds.keys() else rounds[x])
             fixtures['group'] = fixtures['home_id'].apply(lambda x: teams.loc[x, 'group'])
             fixtures['round'] = fixtures.apply(lambda x: x['round'] if pd.isna(x['group']) or 'Stage' not in x['round'] else 'Group ' + x['group'] + ', ' + x['round'], axis = 1)
+            fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
+            fixtures['status'] = fixtures.apply(lambda x: x['status'] + " + " + str(round(x['extra'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] and pd.notna(x['extra']) else x['status'], axis = 1)
             fixtures_records = fixtures.to_dict('records')
 
             first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
-
+            
+            print('fetching information, updating cache', flush = True)
             with cache_lock:
                 cache["standings_rows"] = standings_rows
                 cache["fixtures"] = fixtures_records
                 cache["first_upcoming"] = first_upcoming
                 cache["last_updated"] = time.time()
-        except Exception as e:
-            print(f"Worker error: {e}")
+                print("cache id in fetch_and_process:", id(cache), flush=True)
 
-        time.sleep(3600)  # poll interval
+            print('cache updated', type(fixtures), type(cache['fixtures']), flush = True)
+            print("cache id in fetch_and_process:", id(cache), flush=True)
+        except Exception as e:
+            print(f"Worker error: {e}", flush = True)
+
+        time.sleep(60)  # poll interval
 
 # Start worker once at startup
 worker = threading.Thread(target=fetch_and_process, daemon=True)
@@ -150,6 +158,7 @@ app.layout = html.Div([
     dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
     html.Div(id="scroll-dummy", style={"display": "none"}),
     dcc.Store(id="scroll-target-store"),
+    dcc.Store(id="fixtures-rows"),
     dcc.Interval(id="tick", interval=5_000),  # adjust interval as needed
     html.H2("Fixtures", style={"fontFamily": "sans-serif"}),
     dag.AgGrid(id="fixtures-grid", rowData=[], columnDefs=column_defs_fixtures, defaultColDef = default_col_def_fixtures),
@@ -167,30 +176,54 @@ app.layout = html.Div([
 ], id = 'whole-thing')
 
 @app.callback(
-    Output("fixtures-grid", "rowData"),           # ← match your grid's id
+    Output("fixtures-grid", "rowTransaction"),           # ← match your grid's id
     Output("standings-grid", "children"),    # ← one Output per grid
     Output("last-updated-display", "children"),
+    Output("fixtures-rows", "data"),
     Input("tick", "n_intervals"),
+    State("fixtures-rows", "data"),
 )
+def refresh_grids(n, previous_rows):
+    global still_waiting
+    try:
+        with cache_lock:
+            standings_rows = cache["standings_rows"]
+            fixtures = cache["fixtures"]
+            ts = cache["last_updated"]
+            print(type(ts), flush=True)
+            print("cache id in refresh_grids:", id(cache), flush=True)
 
-def refresh_grids(_):
-    with cache_lock:
-        standings_rows = cache["standings_rows"]
-        fixtures = cache["fixtures"]
-        ts = cache["last_updated"]
+        if standings_rows is None or fixtures is None:
+            no_update = dash.no_update
+            waiting_text = "Waiting for first update..."
+            if still_waiting:
+                waiting_text = "Still waiting for first update..."
+            else:
+                still_waiting = True
+            return no_update, no_update, waiting_text, no_update
 
-    if standings_rows is None or fixtures is None:
-        no_update = dash.no_update
-        return no_update, no_update, "Waiting for first update..."
-
-    standings_grids = [
-        html.Div([
-            html.H3(f"Group {string.ascii_uppercase[idx]}", style={"fontFamily": "sans-serif"}),
-            dag.AgGrid(rowData=row_data, columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style),
-        ]) for idx, row_data in enumerate(standings_rows)
-    ]
-    last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))}"
-    return fixtures, standings_grids, last_updated
+        standings_grids = [
+            html.Div([
+                html.H3(f"Group {string.ascii_uppercase[idx]}", style={"fontFamily": "sans-serif"}),
+                dag.AgGrid(rowData=row_data, columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style),
+            ]) for idx, row_data in enumerate(standings_rows)
+        ]
+        last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))}"
+        
+        previous_dict = {r["id"]: r for r in (previous_rows or [])}
+        to_add, to_update = [], []
+        for row in fixtures:
+            if row["id"] not in previous_dict:
+                to_add.append(row)
+            else:
+                to_update.append(row)
+        
+        print('updating grids', flush = True)
+        return {"add": to_add, "update": to_update}, standings_grids, last_updated, fixtures
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())   # shows in server logs
+        raise
 
 if __name__ == "__main__":
     app.run(debug=True)
