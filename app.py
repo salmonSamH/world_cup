@@ -13,9 +13,8 @@ from state import cache, cache_lock
 
 app = Dash(__name__)
 
-load_dotenv()  # reads .env into the environment
-API_KEY = os.environ["API_KEY"]
-
+load_dotenv()  # only does something if .env exists locally; harmless if not
+api_key = os.environ.get("API_KEY")  # use .get(), not [...]
 still_waiting = False
 
 headers = {'x-apisports-key': API_KEY}
