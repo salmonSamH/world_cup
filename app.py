@@ -12,6 +12,7 @@ import os
 from state import cache, cache_lock
 
 app = Dash(__name__)
+server = app.server
 
 load_dotenv()  # only does something if .env exists locally; harmless if not
 api_key = os.environ.get("API_KEY")  # use .get(), not [...]
