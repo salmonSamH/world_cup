@@ -17,7 +17,7 @@ load_dotenv()  # only does something if .env exists locally; harmless if not
 api_key = os.environ.get("API_KEY")  # use .get(), not [...]
 still_waiting = False
 
-headers = {'x-apisports-key': API_KEY}
+headers = {'x-apisports-key': api_key}
 payload = {'league': 1, 'season': 2026}
 column_defs = [
     {"field": "team",   "headerName": "Team", "width": 200, "headerClass": "ag-left-aligned-header", "cellStyle": {"textAlign": "left"}, "cellRenderer": "TeamRenderer"},
