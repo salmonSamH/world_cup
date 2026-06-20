@@ -211,12 +211,12 @@ def refresh_grids(n, previous_rows):
                 to_add.append(row)
             elif previous_dict[row["id"]] != row:
                 to_update.append(row)
-                print('diagnostics:', row, flush = True)
-                print('diagnostics:', previous_dict[row["id"]], flush = True)
         
+        fixtures_update = {"add": to_add, "update": to_update}
+        if len(to_add) == 0 and len(to_update) == 0:
+            fixtures_update = dash.no_update
         
-        print('diagnostics:', len(to_add), len(to_update), flush = True)
-        return {"add": to_add, "update": to_update}, standings_grids, last_updated, fixtures
+        return fixtures_update, standings_grids, last_updated, fixtures
     except Exception as e:
         import traceback
         print(traceback.format_exc())   # shows in server logs
