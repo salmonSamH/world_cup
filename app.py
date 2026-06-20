@@ -110,7 +110,6 @@ def fetch_and_process():
 
             first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
             
-            print('fetching information, updating cache', flush = True)
             with cache_lock:
                 cache["standings_rows"] = standings_rows
                 cache["fixtures"] = fixtures_records
@@ -186,8 +185,6 @@ def refresh_grids(n, previous_rows):
             standings_rows = cache["standings_rows"]
             fixtures = cache["fixtures"]
             ts = cache["last_updated"]
-            print(type(ts), flush=True)
-            print("cache id in refresh_grids:", id(cache), flush=True)
 
         if standings_rows is None or fixtures is None:
             no_update = dash.no_update
@@ -214,7 +211,7 @@ def refresh_grids(n, previous_rows):
             else:
                 to_update.append(row)
         
-        print(to_update, flush = True)
+        print('diagnostics:', len(to_add), len(to_update), flush = True)
         return {"add": to_add, "update": to_update}, standings_grids, last_updated, fixtures
     except Exception as e:
         import traceback
