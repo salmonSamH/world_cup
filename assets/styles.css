@@ -8,3 +8,21 @@
   gap: 20px; /* Adds 20px of space between all child elements */
   margin: 40px;
 }
+
+.bracket {
+  display: flex;              /* rounds side by side */
+  padding: 40px;
+}
+
+.round {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;  /* spreads matches evenly, fewer matches = wider gaps = rough centering */
+}
+
+.match {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  margin: 8px 0;
+  position: relative;
+}

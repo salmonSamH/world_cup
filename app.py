@@ -68,6 +68,7 @@ dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
 }
 style_fixtures = {"height": "400px"}
+
 ADDED = False
 
 # ── Background worker ──────────────────────────────────────────────
@@ -149,7 +150,21 @@ clientside_callback(
     Output("scroll-dummy", "children"),
     Input("scroll-target-store", "data"),
 )
-
+ROUNDS = [{"name":"Round of 32", "matches": [
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+]}, {"name": "Round of 16", "matches": [
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+]}, {"name": "Quarterfinals", "matches": [
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+]}, {"name": "Semifinals", "matches": [
+    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+]}, {"name": "Finals", "matches": [
+    {"team1": "home", "team2": "away"}
+]}]
 app.layout = html.Div([
     html.H1("World Cup Tracker", style={"fontFamily": "sans-serif"}),
     html.P("My website for following the World Cup, inspired in part by Google's World Cup widget.", style={"fontFamily": "sans-serif"}),
@@ -171,13 +186,20 @@ app.layout = html.Div([
                     "display": "grid",
                     "gridTemplateColumns": "repeat(2, 1fr)",
                     "gap": "32px",
+                    "minHeight": "600px"
                 }, 
                 id="standings-grid"
             )
         ]),
         dcc.Tab(label="Bracket", value="tab-3", style={"fontFamily": "sans-serif"}, children=[
             html.H2("Bracket", style={"fontFamily": "sans-serif"}),
-            html.P("Bracket data is unavailable. Check back shortly.", style={"fontFamily": "sans-serif"}),
+            html.Div(className="bracket", children=[
+                html.Div(className="round", children=[
+                    html.Div(className="match", children=[
+                        html.Div(m["team1"]), html.Div(m["team2"])
+                    ]) for m in round["matches"]
+                ]) for round in ROUNDS
+            ])
         ]),
     ]),
     html.Small(children = "", id="last-updated-display", style={"color": "gray", "fontFamily": "sans-serif"})
