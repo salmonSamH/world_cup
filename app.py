@@ -169,7 +169,7 @@ ROUNDS = [{"name":"Round of 32", "matches": [
 app.layout = html.Div([
     html.H1("World Cup Tracker", style={"fontFamily": "sans-serif"}),
     html.P("My website for following the World Cup, inspired in part by Google's World Cup widget.", style={"fontFamily": "sans-serif"}),
-    dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
+    dcc.Interval(id="scroll-trigger", interval=1000, max_intervals=2),
     html.Div(id="scroll-dummy", style={"display": "none"}),
     dcc.Store(id="scroll-target-store"),
     dcc.Store(id="fixtures-rows"),
