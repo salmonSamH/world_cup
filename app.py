@@ -134,7 +134,6 @@ worker.start()
 def init_scroll(_):
     with cache_lock:
         return cache.get("first_upcoming", 0)
-    
 clientside_callback(
     f"""
     function(n) {{
@@ -151,6 +150,7 @@ clientside_callback(
     Output("scroll-dummy", "children"),
     Input("scroll-target-store", "data"),
 )
+
 ROUNDS = [{"name":"Round of 32", "matches": [
     {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
     {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
