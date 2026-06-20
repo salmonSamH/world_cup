@@ -67,7 +67,7 @@ default_col_def_fixtures = {"width": 200, "cellStyle": {"textAlign": "center"}, 
 dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
 }
-style_fixtures = {"height": "700px"}
+style_fixtures = {"height": "400px"}
 ADDED = False
 
 # ── Background worker ──────────────────────────────────────────────
@@ -125,49 +125,61 @@ def fetch_and_process():
 worker = threading.Thread(target=fetch_and_process, daemon=True)
 worker.start()
 
-# @app.callback(
-#     Output("scroll-target-store", "data"),
-#     Input("scroll-trigger", "n_intervals"),
-# )
-# def init_scroll(_):
-#     with cache_lock:
-#         return cache.get("first_upcoming", 0)
+@app.callback(
+    Output("scroll-target-store", "data"),
+    Input("scroll-trigger", "n_intervals"),
+)
+def init_scroll(_):
+    with cache_lock:
+        return cache.get("first_upcoming", 0)
     
-# clientside_callback(
-#     f"""
-#     function(n) {{
-#         if (!n) return null;
-#         setTimeout(function() {{
-#             var api = dash_ag_grid.getApiAsync("fixtures-grid");
-#             api.then(function(gridApi) {{
-#                 gridApi.ensureIndexVisible(n, "top");
-#             }});
-#         }}, 100);
-#         return null;
-#     }}
-#     """,
-#     Output("scroll-dummy", "children"),
-#     Input("scroll-target-store", "data"),
-# )
+clientside_callback(
+    f"""
+    function(n) {{
+        if (!n) return null;
+        setTimeout(function() {{
+            var api = dash_ag_grid.getApiAsync("fixtures-grid");
+            api.then(function(gridApi) {{
+                gridApi.ensureIndexVisible(n, "top");
+            }});
+        }}, 100);
+        return null;
+    }}
+    """,
+    Output("scroll-dummy", "children"),
+    Input("scroll-target-store", "data"),
+)
 
 app.layout = html.Div([
-    # dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
-    # html.Div(id="scroll-dummy", style={"display": "none"}),
-    # dcc.Store(id="scroll-target-store"),
+    html.H1("World Cup Tracker", style={"fontFamily": "sans-serif"}),
+    html.P("My website for following the World Cup, inspired in part by Google's World Cup widget.", style={"fontFamily": "sans-serif"}),
+    dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
+    html.Div(id="scroll-dummy", style={"display": "none"}),
+    dcc.Store(id="scroll-target-store"),
     dcc.Store(id="fixtures-rows"),
     dcc.Interval(id="tick", interval=5_000),  # adjust interval as needed
-    html.H2("Fixtures", style={"fontFamily": "sans-serif"}),
-    dag.AgGrid(id="fixtures-grid", rowData=[], columnDefs=column_defs_fixtures, defaultColDef = default_col_def_fixtures, getRowId="params.data.id"),
-    html.H2("Standings", style={"fontFamily": "sans-serif"}),
-    html.Div(
-        children = [], 
-        style = {
-            "display": "grid",
-            "gridTemplateColumns": "repeat(2, 1fr)",
-            "gap": "32px",
-        }, 
-        id="standings-grid"
-    ),
+    dcc.Tabs(id="tabs", value="tab-1", children=[
+        dcc.Tab(label="Fixtures", value="tab-1", style={"fontFamily": "sans-serif"}, children=[
+            html.H2("Fixtures", style={"fontFamily": "sans-serif"}),
+            dag.AgGrid(id="fixtures-grid", rowData=[], columnDefs=column_defs_fixtures, defaultColDef = default_col_def_fixtures, getRowId="params.data.id"),
+        ]),
+        dcc.Tab(label="Standings", value="tab-2", style={"fontFamily": "sans-serif"}, children=[
+            html.H2("Standings", style={"fontFamily": "sans-serif"}),
+            html.Div(
+                children = [], 
+                style = {
+                    "display": "grid",
+                    "gridTemplateColumns": "repeat(2, 1fr)",
+                    "gap": "32px",
+                }, 
+                id="standings-grid"
+            )
+        ]),
+        dcc.Tab(label="Bracket", value="tab-3", style={"fontFamily": "sans-serif"}, children=[
+            html.H2("Bracket", style={"fontFamily": "sans-serif"}),
+            html.P("Bracket data is unavailable. Check back shortly.", style={"fontFamily": "sans-serif"}),
+        ]),
+    ]),
     html.Small(children = "", id="last-updated-display", style={"color": "gray", "fontFamily": "sans-serif"})
 ], id = 'whole-thing')
 
