@@ -7,6 +7,7 @@ import string
 import pandas as pd
 import datetime
 from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
 import os
 # app.py, callbacks.py, background.py — all import from the same place
 from state import cache, cache_lock
@@ -98,8 +99,8 @@ def fetch_and_process():
             fixtures = fixtures[['fixture.id', 'fixture.timestamp', 'fixture.venue.name', 'fixture.venue.city', 'fixture.status.long', 'fixture.status.short', 'fixture.status.elapsed', 'fixture.status.extra', 'league.name', 'league.round', 'teams.home.id', 'teams.home.name', 'teams.home.logo', 'teams.away.id', 'teams.away.name', 'teams.away.logo', 'goals.home', 'goals.away']]
             fixtures.columns = ['id','timestamp', 'venue', 'city', 'status_long', 'status_short', 'elapsed', 'extra', 'league', 'round', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals']
             fixtures = fixtures.sort_values('timestamp').reset_index(drop=True)
-            fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%Y-%m-%d'))
-            fixtures['time'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).strftime('%H:%M'))
+            fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%Y-%m-%d'))
+            fixtures['time'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%H:%M'))
             fixtures['score'] = fixtures.apply(lambda x: str(round(x['home_goals'])) + ' - ' + str(round(x['away_goals'])) if pd.notna(x['home_goals']) and pd.notna(x['away_goals']) else None, axis=1)
             fixtures['city'] = fixtures['city'].apply(lambda x: x if x not in venues.keys() else venues[x])
             fixtures['round'] = fixtures['round'].apply(lambda x: x if x not in rounds.keys() else rounds[x])
