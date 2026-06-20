@@ -49,6 +49,8 @@ get_row_style = {
 dash_grid_options = {
     "domLayout": "autoHeight",
     "suppressFieldDotNotation": True,
+    "suppressCellFocus": True,
+    "suppressScrollOnNewData": True,
 }
 style = {"height": None}
 venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
@@ -66,6 +68,8 @@ column_defs_fixtures = [
 default_col_def_fixtures = {"width": 200, "cellStyle": {"textAlign": "center"}, "headerClass": "center-header", "resizable": False}
 dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
+    "suppressCellFocus": True,
+    "suppressScrollOnNewData": True,
 }
 style_fixtures = {"height": "400px"}
 ADDED = False
