@@ -106,6 +106,7 @@ def fetch_and_process():
             fixtures['round'] = fixtures.apply(lambda x: x['round'] if pd.isna(x['group']) or 'Stage' not in x['round'] else 'Group ' + x['group'] + ', ' + x['round'], axis = 1)
             fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
             fixtures['status'] = fixtures.apply(lambda x: x['status'] + " + " + str(round(x['extra'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] and pd.notna(x['extra']) else x['status'], axis = 1)
+            fixtures = fixtures.astype(object).where(pd.notnull(fixtures), None)
             fixtures_records = fixtures.to_dict('records')
 
             first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
@@ -208,8 +209,11 @@ def refresh_grids(n, previous_rows):
         for row in fixtures:
             if row["id"] not in previous_dict:
                 to_add.append(row)
-            else:
+            elif previous_dict[row["id"]] != row:
                 to_update.append(row)
+                print('diagnostics:', row, flush = True)
+                print('diagnostics:', previous_dict[row["id"]], flush = True)
+        
         
         print('diagnostics:', len(to_add), len(to_update), flush = True)
         return {"add": to_add, "update": to_update}, standings_grids, last_updated, fixtures
