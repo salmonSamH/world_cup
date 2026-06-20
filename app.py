@@ -116,10 +116,6 @@ def fetch_and_process():
                 cache["fixtures"] = fixtures_records
                 cache["first_upcoming"] = first_upcoming
                 cache["last_updated"] = time.time()
-                print("cache id in fetch_and_process:", id(cache), flush=True)
-
-            print('cache updated', type(fixtures), type(cache['fixtures']), flush = True)
-            print("cache id in fetch_and_process:", id(cache), flush=True)
         except Exception as e:
             print(f"Worker error: {e}", flush = True)
 
@@ -129,30 +125,30 @@ def fetch_and_process():
 worker = threading.Thread(target=fetch_and_process, daemon=True)
 worker.start()
 
-@app.callback(
-    Output("scroll-target-store", "data"),
-    Input("scroll-trigger", "n_intervals"),
-)
-def init_scroll(_):
-    with cache_lock:
-        return cache.get("first_upcoming", 0)
+# @app.callback(
+#     Output("scroll-target-store", "data"),
+#     Input("scroll-trigger", "n_intervals"),
+# )
+# def init_scroll(_):
+#     with cache_lock:
+#         return cache.get("first_upcoming", 0)
     
-clientside_callback(
-    f"""
-    function(n) {{
-        if (!n) return null;
-        setTimeout(function() {{
-            var api = dash_ag_grid.getApiAsync("fixtures-grid");
-            api.then(function(gridApi) {{
-                gridApi.ensureIndexVisible(n, "top");
-            }});
-        }}, 100);
-        return null;
-    }}
-    """,
-    Output("scroll-dummy", "children"),
-    Input("scroll-target-store", "data"),
-)
+# clientside_callback(
+#     f"""
+#     function(n) {{
+#         if (!n) return null;
+#         setTimeout(function() {{
+#             var api = dash_ag_grid.getApiAsync("fixtures-grid");
+#             api.then(function(gridApi) {{
+#                 gridApi.ensureIndexVisible(n, "top");
+#             }});
+#         }}, 100);
+#         return null;
+#     }}
+#     """,
+#     Output("scroll-dummy", "children"),
+#     Input("scroll-target-store", "data"),
+# )
 
 app.layout = html.Div([
     dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
@@ -218,7 +214,7 @@ def refresh_grids(n, previous_rows):
             else:
                 to_update.append(row)
         
-        print('updating grids', flush = True)
+        print(to_update, flush = True)
         return {"add": to_add, "update": to_update}, standings_grids, last_updated, fixtures
     except Exception as e:
         import traceback
