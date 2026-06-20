@@ -125,35 +125,35 @@ def fetch_and_process():
 worker = threading.Thread(target=fetch_and_process, daemon=True)
 worker.start()
 
-@app.callback(
-    Output("scroll-target-store", "data"),
-    Input("scroll-trigger", "n_intervals"),
-)
-def init_scroll(_):
-    with cache_lock:
-        return cache.get("first_upcoming", 0)
+# @app.callback(
+#     Output("scroll-target-store", "data"),
+#     Input("scroll-trigger", "n_intervals"),
+# )
+# def init_scroll(_):
+#     with cache_lock:
+#         return cache.get("first_upcoming", 0)
     
-clientside_callback(
-    f"""
-    function(n) {{
-        if (!n) return null;
-        setTimeout(function() {{
-            var api = dash_ag_grid.getApiAsync("fixtures-grid");
-            api.then(function(gridApi) {{
-                gridApi.ensureIndexVisible(n, "top");
-            }});
-        }}, 100);
-        return null;
-    }}
-    """,
-    Output("scroll-dummy", "children"),
-    Input("scroll-target-store", "data"),
-)
+# clientside_callback(
+#     f"""
+#     function(n) {{
+#         if (!n) return null;
+#         setTimeout(function() {{
+#             var api = dash_ag_grid.getApiAsync("fixtures-grid");
+#             api.then(function(gridApi) {{
+#                 gridApi.ensureIndexVisible(n, "top");
+#             }});
+#         }}, 100);
+#         return null;
+#     }}
+#     """,
+#     Output("scroll-dummy", "children"),
+#     Input("scroll-target-store", "data"),
+# )
 
 app.layout = html.Div([
-    dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
-    html.Div(id="scroll-dummy", style={"display": "none"}),
-    dcc.Store(id="scroll-target-store"),
+    # dcc.Interval(id="scroll-trigger", interval=300, max_intervals=1),
+    # html.Div(id="scroll-dummy", style={"display": "none"}),
+    # dcc.Store(id="scroll-target-store"),
     dcc.Store(id="fixtures-rows"),
     dcc.Interval(id="tick", interval=5_000),  # adjust interval as needed
     html.H2("Fixtures", style={"fontFamily": "sans-serif"}),
