@@ -49,7 +49,6 @@ get_row_style = {
 dash_grid_options = {
     "domLayout": "autoHeight",
     "suppressFieldDotNotation": True,
-    "suppressScrollOnNewData": False,
 }
 style = {"height": None}
 venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
@@ -173,6 +172,18 @@ app.layout = html.Div([
     html.Div(id="scroll-dummy", style={"display": "none"}),
     dcc.Store(id="scroll-target-store"),
     dcc.Store(id="fixtures-rows"),
+    dcc.Store(id="group-a-data"),
+    dcc.Store(id="group-b-data"),
+    dcc.Store(id="group-c-data"),
+    dcc.Store(id="group-d-data"),
+    dcc.Store(id="group-e-data"),
+    dcc.Store(id="group-f-data"),
+    dcc.Store(id="group-g-data"),
+    dcc.Store(id="group-h-data"),
+    dcc.Store(id="group-i-data"),
+    dcc.Store(id="group-j-data"),
+    dcc.Store(id="group-k-data"),
+    dcc.Store(id="group-l-data"),
     dcc.Interval(id="tick", interval=5_000),  # adjust interval as needed
     dcc.Tabs(id="tabs", value="tab-1", children=[
         dcc.Tab(label="Fixtures", value="tab-1", style={"fontFamily": "sans-serif"}, children=[
@@ -182,7 +193,56 @@ app.layout = html.Div([
         dcc.Tab(label="Standings", value="tab-2", style={"fontFamily": "sans-serif"}, children=[
             html.H2("Standings", style={"fontFamily": "sans-serif"}),
             html.Div(
-                children = [], 
+                [
+                    html.Div([
+                        html.H3("Group A", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-a", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group B", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-b", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group C", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-c", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group D", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-d", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group E", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-e", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group F", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-f", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group G", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-g", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group H", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-h", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group I", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-i", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group J", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-j", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group K", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-k", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                    html.Div([
+                        html.H3("Group L", style={"fontFamily": "sans-serif"}),
+                        dag.AgGrid(id="group-l", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
+                    ]),
+                ], 
                 style = {
                     "display": "grid",
                     "gridTemplateColumns": "repeat(2, 1fr)",
@@ -207,14 +267,49 @@ app.layout = html.Div([
 ], id = 'whole-thing')
 
 @app.callback(
-    Output("fixtures-grid", "rowTransaction"),           # ← match your grid's id
-    Output("standings-grid", "children"),    # ← one Output per grid
+    Output("fixtures-grid", "rowTransaction"),
+    Output("group-a", "rowTransaction"), 
+    Output("group-b", "rowTransaction"), 
+    Output("group-c", "rowTransaction"), 
+    Output("group-d", "rowTransaction"), 
+    Output("group-e", "rowTransaction"), 
+    Output("group-f", "rowTransaction"), 
+    Output("group-g", "rowTransaction"), 
+    Output("group-h", "rowTransaction"), 
+    Output("group-i", "rowTransaction"), 
+    Output("group-j", "rowTransaction"), 
+    Output("group-k", "rowTransaction"), 
+    Output("group-l", "rowTransaction"),  
     Output("last-updated-display", "children"),
     Output("fixtures-rows", "data"),
+    Output("group-a-data", "data"),
+    Output("group-b-data", "data"),
+    Output("group-c-data", "data"),
+    Output("group-d-data", "data"),
+    Output("group-e-data", "data"),
+    Output("group-f-data", "data"),
+    Output("group-g-data", "data"),
+    Output("group-h-data", "data"),
+    Output("group-i-data", "data"),
+    Output("group-j-data", "data"),
+    Output("group-k-data", "data"),
+    Output("group-l-data", "data"),
     Input("tick", "n_intervals"),
     State("fixtures-rows", "data"),
+    State("group-a-data", "data"),
+    State("group-b-data", "data"),
+    State("group-c-data", "data"),
+    State("group-d-data", "data"),
+    State("group-e-data", "data"),
+    State("group-f-data", "data"),
+    State("group-g-data", "data"),
+    State("group-h-data", "data"),
+    State("group-i-data", "data"),
+    State("group-j-data", "data"),
+    State("group-k-data", "data"),
+    State("group-l-data", "data"),
 )
-def refresh_grids(n, previous_rows):
+def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
     global still_waiting
     try:
         with cache_lock:
@@ -230,13 +325,7 @@ def refresh_grids(n, previous_rows):
             else:
                 still_waiting = True
             return no_update, no_update, waiting_text, no_update
-
-        standings_grids = [
-            html.Div([
-                html.H3(f"Group {string.ascii_uppercase[idx]}", style={"fontFamily": "sans-serif"}),
-                dag.AgGrid(rowData=row_data, columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style),
-            ]) for idx, row_data in enumerate(standings_rows)
-        ]
+        
         last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))}"
         
         previous_dict = {r["id"]: r for r in (previous_rows or [])}
@@ -250,12 +339,26 @@ def refresh_grids(n, previous_rows):
         fixtures_update = {"add": to_add, "update": to_update}
         if len(to_add) == 0 and len(to_update) == 0:
             fixtures_update = dash.no_update
-        
-        return fixtures_update, standings_grids, last_updated, fixtures
+
+        return fixtures_update, updates(a, standings_rows[0]), updates(b, standings_rows[1]), updates(c, standings_rows[2]), updates(d, standings_rows[3]), updates(e, standings_rows[4]), updates(f, standings_rows[5]), updates(g, standings_rows[6]), updates(h, standings_rows[7]), updates(i, standings_rows[8]), updates(j, standings_rows[9]), updates(k, standings_rows[10]), updates(l, standings_rows[11]), last_updated, fixtures, standings_rows[0], standings_rows[1], standings_rows[2], standings_rows[3], standings_rows[4], standings_rows[5], standings_rows[6], standings_rows[7], standings_rows[8], standings_rows[9], standings_rows[10], standings_rows[11]
     except Exception as e:
         import traceback
         print(traceback.format_exc())   # shows in server logs
         raise
+
+def updates(old, new):
+    previous_dict = {r["id"]: r for r in (old or [])}
+    to_add, to_update = [], []
+    for row in new:
+        if row["id"] not in previous_dict:
+            to_add.append(row)
+        elif previous_dict[row["id"]] != row:
+            to_update.append(row)
+    
+    changes = {"add": to_add, "update": to_update}
+    if len(to_add) == 0 and len(to_update) == 0:
+        changes = dash.no_update
+    return changes
 
 if __name__ == "__main__":
     app.run(debug=True)
