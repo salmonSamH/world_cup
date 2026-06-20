@@ -49,8 +49,6 @@ get_row_style = {
 dash_grid_options = {
     "domLayout": "autoHeight",
     "suppressFieldDotNotation": True,
-    "suppressCellFocus": True,
-    "suppressScrollOnNewData": True,
 }
 style = {"height": None}
 venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
@@ -60,18 +58,16 @@ column_defs_fixtures = [
     {'field': 'time', 'headerName': 'Time', "width": 80},
     {'field': 'city', 'headerName': 'Location'},
     {'field': 'round', 'headerName': 'Round'},
-    {'field': 'status', 'headerName': 'Status', "width": 150, "enableCellChangeFlash": True},
-    {'field': 'home', 'headerName': '', "cellRenderer": "HomeRenderer", "enableCellChangeFlash": True},
+    {'field': 'status', 'headerName': 'Status', "width": 150},
+    {'field': 'home', 'headerName': '', "cellRenderer": "HomeRenderer"},
     {'field': 'score', 'headerName': '', "width": 100, "enableCellChangeFlash": True},
-    {'field': 'away', 'headerName': '', "cellRenderer": "AwayRenderer", "enableCellChangeFlash": True},
+    {'field': 'away', 'headerName': '', "cellRenderer": "AwayRenderer"},
 ]
 default_col_def_fixtures = {"width": 200, "cellStyle": {"textAlign": "center"}, "headerClass": "center-header", "resizable": False}
 dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
-    "suppressCellFocus": True,
-    "suppressScrollOnNewData": True,
 }
-style_fixtures = {"height": "400px"}
+style_fixtures = {"height": "700px"}
 ADDED = False
 
 # ── Background worker ──────────────────────────────────────────────
