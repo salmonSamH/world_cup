@@ -56,7 +56,7 @@ venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "A
 rounds = {"Group Stage - 1": "First Stage", "Group Stage - 2": "Second Stage", "Group Stage - 3": "Third Stage"}
 column_defs_fixtures = [
     {'field': 'date', 'headerName': 'Date', "width": 120},
-    {'field': 'time', 'headerName': 'Time', "width": 80},
+    {'field': 'time', 'headerName': 'Time (PDT)', "width": 120},
     {'field': 'city', 'headerName': 'Location'},
     {'field': 'round', 'headerName': 'Round'},
     {'field': 'status', 'headerName': 'Status', "width": 150},
@@ -327,7 +327,7 @@ def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
                 still_waiting = True
             return no_update, no_update, waiting_text, no_update
         
-        last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))}"
+        last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))} UTC"
         
         previous_dict = {r["id"]: r for r in (previous_rows or [])}
         to_add, to_update = [], []
