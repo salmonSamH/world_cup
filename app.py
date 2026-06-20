@@ -12,7 +12,9 @@ import os
 # app.py, callbacks.py, background.py — all import from the same place
 from state import cache, cache_lock
 
-app = Dash(__name__)
+app = Dash(__name__, external_stylesheets=[
+    'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
+])
 server = app.server
 
 load_dotenv()  # only does something if .env exists locally; harmless if not
@@ -69,7 +71,6 @@ dash_grid_options_fixtures = {
     "suppressFieldDotNotation": True,
 }
 style_fixtures = {"height": "400px"}
-
 ADDED = False
 
 # ── Background worker ──────────────────────────────────────────────
@@ -152,23 +153,25 @@ clientside_callback(
 )
 
 ROUNDS = [{"name":"Round of 32", "matches": [
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+    {"team1": "home", "team2": "away", "info": "74"}, {"team1": "home", "team2": "away", "info": "77"}, {"team1": "home", "team2": "away", "info": "73"}, {"team1": "home", "team2": "away", "info": "75"},
+    {"team1": "home", "team2": "away", "info": "83"}, {"team1": "home", "team2": "away", "info": "84"}, {"team1": "home", "team2": "away", "info": "81"}, {"team1": "home", "team2": "away", "info": "82"},
+    {"team1": "home", "team2": "away", "info": "76"}, {"team1": "home", "team2": "away", "info": "78"}, {"team1": "home", "team2": "away", "info": "79"}, {"team1": "home", "team2": "away", "info": "80"},
+    {"team1": "home", "team2": "away", "info": "86"}, {"team1": "home", "team2": "away", "info": "88"}, {"team1": "home", "team2": "away", "info": "85"}, {"team1": "home", "team2": "away", "info": "87"}
 ]}, {"name": "Round of 16", "matches": [
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"},
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+    {"team1": "home", "team2": "away", "info": "89"}, {"team1": "home", "team2": "away", "info": "90"}, {"team1": "home", "team2": "away", "info": "93"}, {"team1": "home", "team2": "away", "info": "94"},
+    {"team1": "home", "team2": "away", "info": "91"}, {"team1": "home", "team2": "away", "info": "92"}, {"team1": "home", "team2": "away", "info": "95"}, {"team1": "home", "team2": "away", "info": "96"}
 ]}, {"name": "Quarterfinals", "matches": [
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+    {"team1": "home", "team2": "away", "info": "97"}, {"team1": "home", "team2": "away", "info": "98"}, {"team1": "home", "team2": "away", "info": "99"}, {"team1": "home", "team2": "away", "info": "100"}
 ]}, {"name": "Semifinals", "matches": [
-    {"team1": "home", "team2": "away"}, {"team1": "home", "team2": "away"}
+    {"team1": "home", "team2": "away", "info": "101"}, {"team1": "home", "team2": "away", "info": "102"}
 ]}, {"name": "Finals", "matches": [
-    {"team1": "home", "team2": "away"}
+    {"team1": "home", "team2": "away", "info": "104"}
+]}, {"name": "Third Place", "matches": [
+    {"team1": "home", "team2": "away", "info": "103"}
 ]}]
 app.layout = html.Div([
-    html.H1("World Cup Tracker", style={"fontFamily": "sans-serif"}),
-    html.P("My website for following the World Cup, inspired in part by Google's World Cup widget.", style={"fontFamily": "sans-serif"}),
+    html.H1("World Cup Tracker", style={"fontFamily": "Inter, sans-serif"}),
+    html.P("My website for following the World Cup, inspired in part by Google's World Cup widget.", style={"fontFamily": "Inter, sans-serif"}),
     dcc.Interval(id="scroll-trigger", interval=1000, max_intervals=2),
     html.Div(id="scroll-dummy", style={"display": "none"}),
     dcc.Store(id="scroll-target-store"),
@@ -187,60 +190,60 @@ app.layout = html.Div([
     dcc.Store(id="group-l-data"),
     dcc.Interval(id="tick", interval=5_000),  # adjust interval as needed
     dcc.Tabs(id="tabs", value="tab-1", children=[
-        dcc.Tab(label="Fixtures", value="tab-1", style={"fontFamily": "sans-serif"}, children=[
-            html.H2("Fixtures", style={"fontFamily": "sans-serif"}),
+        dcc.Tab(label="Fixtures", value="tab-1", style={"fontFamily": "Inter, sans-serif"}, children=[
+            html.H2("Fixtures", style={"fontFamily": "Inter, sans-serif"}),
             dag.AgGrid(id="fixtures-grid", rowData=[], columnDefs=column_defs_fixtures, defaultColDef = default_col_def_fixtures, getRowId="params.data.id"),
         ]),
-        dcc.Tab(label="Standings", value="tab-2", style={"fontFamily": "sans-serif"}, children=[
-            html.H2("Standings", style={"fontFamily": "sans-serif"}),
+        dcc.Tab(label="Standings", value="tab-2", style={"fontFamily": "Inter, sans-serif"}, children=[
+            html.H2("Standings", style={"fontFamily": "Inter, sans-serif"}),
             html.Div(
                 [
                     html.Div([
-                        html.H3("Group A", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group A", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-a", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group B", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group B", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-b", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group C", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group C", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-c", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group D", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group D", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-d", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group E", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group E", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-e", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group F", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group F", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-f", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group G", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group G", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-g", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group H", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group H", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-h", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group I", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group I", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-i", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group J", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group J", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-j", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group K", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group K", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-k", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                     html.Div([
-                        html.H3("Group L", style={"fontFamily": "sans-serif"}),
+                        html.H3("Group L", style={"fontFamily": "Inter, sans-serif"}),
                         dag.AgGrid(id="group-l", rowData=[], columnDefs=column_defs, defaultColDef = default_col_def, getRowStyle = get_row_style, dashGridOptions = dash_grid_options, style = style, getRowId="params.data.id"),
                     ]),
                 ], 
@@ -253,18 +256,126 @@ app.layout = html.Div([
                 id="standings-grid"
             )
         ]),
-        dcc.Tab(label="Bracket", value="tab-3", style={"fontFamily": "sans-serif"}, children=[
-            html.H2("Bracket", style={"fontFamily": "sans-serif"}),
+        dcc.Tab(label="Bracket", value="tab-3", style={"fontFamily": "Inter, sans-serif"}, children=[
+            html.H2("Bracket", style={"fontFamily": "Inter, sans-serif"}),
             html.Div(className="bracket", children=[
-                html.Div(className="round", children=[
+                html.Div(id="round-of-32", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(m["team1"]), html.Div(m["team2"])
-                    ]) for m in round["matches"]
-                ]) for round in ROUNDS
+                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                    ]) for m in ROUNDS[0]['matches']
+                ]),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                ],id="32-to-16-before", className="connector-column"),
+                html.Div(children=[
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                    html.Div(className="connector-vertical-4"),
+                ],id="32-to-16-middle", className="connector-column-vertical"),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                ],id="32-to-16-after", className="connector-column"),
+                html.Div(id="round-of-16", className="round", children=[
+                    html.Div(className="match", children=[
+                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                    ]) for m in ROUNDS[1]['matches']
+                ]),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                ],id="16-to-quarters-before", className="connector-column"),
+                html.Div(children=[
+                    html.Div(className="connector-vertical-3"),
+                    html.Div(className="connector-vertical-3"),
+                    html.Div(className="connector-vertical-3"),
+                    html.Div(className="connector-vertical-3"),
+                ],id="16-to-quarters-middle", className="connector-column-vertical"),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector")
+                ],id="16-to-quarters-after", className="connector-column"),
+                html.Div(id="quarterfinals", className="round", children=[
+                    html.Div(className="match", children=[
+                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                    ]) for m in ROUNDS[2]['matches']
+                ]),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector"),
+                    html.Div(className="connector")
+                ],id="quarters-to-semis-before", className="connector-column"),
+                html.Div(children=[
+                    html.Div(className="connector-vertical-2"),
+                    html.Div(className="connector-vertical-2"),
+                ],id="quarters-to-semis-middle", className="connector-column-vertical"),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector")
+                ],id="quarters-to-semis-after", className="connector-column"),
+                html.Div(id="semifinals", className="round", children=[
+                    html.Div(className="match", children=[
+                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                    ]) for m in ROUNDS[3]['matches']
+                ]),
+                html.Div(children=[
+                    html.Div(className="connector"),
+                    html.Div(className="connector")
+                ],id="semis-to-finals-before", className="connector-column"),
+                html.Div(children=[
+                    html.Div(className="connector-vertical-1")
+                ],id="semis-to-finals-middle", className="connector-column-vertical"),
+                html.Div(children=[
+                    html.Div(className="connector")
+                ],id="semis-to-finals-after", className="connector-column"),
+                html.Div(id="finals", className="round", children=[
+                    html.Div(className="match-dummy"),
+                    html.Div(className="match", children=[
+                        html.Div(ROUNDS[4]['matches'][0]["team1"]), html.Div(ROUNDS[4]['matches'][0]["team2"]), html.Div(ROUNDS[4]['matches'][0]["info"])
+                    ]),
+                    html.Div(className="match", children=[
+                        html.Div(ROUNDS[5]['matches'][0]["team1"]), html.Div(ROUNDS[5]['matches'][0]["team2"]), html.Div(ROUNDS[5]['matches'][0]["info"])
+                    ])
+                ])
             ])
         ]),
     ]),
-    html.Small(children = "", id="last-updated-display", style={"color": "gray", "fontFamily": "sans-serif"})
+    html.Small(children = "", id="last-updated-display", style={"color": "gray", "fontFamily": "Inter, sans-serif"})
 ], id = 'whole-thing')
 
 @app.callback(
@@ -325,7 +436,7 @@ def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
                 waiting_text = "Still waiting for first update..."
             else:
                 still_waiting = True
-            return no_update, no_update, waiting_text, no_update
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, waiting_text, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
         
         last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))} UTC"
         

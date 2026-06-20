@@ -1,3 +1,7 @@
+body {
+  font-family: Inter, sans-serif;
+}
+
 .center-header .ag-header-cell-label {
     justify-content: center;
 }
@@ -11,18 +15,95 @@
 
 .bracket {
   display: flex;              /* rounds side by side */
-  padding: 40px;
+  justify-content: space-around;
+  position: relative;
 }
 
 .round {
   display: flex;
   flex-direction: column;
   justify-content: space-around;  /* spreads matches evenly, fewer matches = wider gaps = rough centering */
+  position: relative;
 }
+
 
 .match {
   border: 1px solid #ccc;
+  width: 150px;
+  height: 50px;
   padding: 6px 10px;
   margin: 8px 0;
   position: relative;
+}
+
+.match-dummy {
+  border: 1px solid transparent;
+  width: 150px;
+  height: 50px;
+  padding: 6px 10px;
+  margin: 8px 0;
+  position: relative;
+}
+
+.connector-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex-grow: 1;
+}
+
+.connector {
+  content: "";
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;     /* Vertically centers */
+  width: 100%;
+  height: 3px;
+  background: #aaa;
+}
+
+.connector-column-vertical {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.connector-vertical-4 {
+  content: "";
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;     /* Vertically centers */
+  width: 3px;
+  height: calc(6.25% + 3px);
+  background: #aaa;
+}
+
+.connector-vertical-3 {
+  content: "";
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;     /* Vertically centers */
+  width: 3px;
+  height: calc(12.5% + 3px);
+  background: #aaa;
+}
+
+.connector-vertical-2 {
+  content: "";
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;     /* Vertically centers */
+  width: 3px;
+  height: calc(25% + 3px);
+  background: #aaa;
+}
+
+.connector-vertical-1 {
+  content: "";
+  display: flex;
+  justify-content: center; /* Horizontally centers */
+  align-items: center;     /* Vertically centers */
+  width: 3px;
+  height: calc(50% + 3px);
+  background: #aaa;
 }
