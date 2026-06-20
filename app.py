@@ -49,6 +49,7 @@ get_row_style = {
 dash_grid_options = {
     "domLayout": "autoHeight",
     "suppressFieldDotNotation": True,
+    "suppressScrollOnNewData": False,
 }
 style = {"height": None}
 venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
