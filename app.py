@@ -58,10 +58,10 @@ column_defs_fixtures = [
     {'field': 'time', 'headerName': 'Time', "width": 80},
     {'field': 'city', 'headerName': 'Location'},
     {'field': 'round', 'headerName': 'Round'},
-    {'field': 'status', 'headerName': 'Status', "width": 150},
-    {'field': 'home', 'headerName': '', "cellRenderer": "HomeRenderer"},
-    {'field': 'score', 'headerName': '', "width": 100},
-    {'field': 'away', 'headerName': '', "cellRenderer": "AwayRenderer"},
+    {'field': 'status', 'headerName': 'Status', "width": 150, "enableCellChangeFlash": True},
+    {'field': 'home', 'headerName': '', "cellRenderer": "HomeRenderer", "enableCellChangeFlash": True},
+    {'field': 'score', 'headerName': '', "width": 100, "enableCellChangeFlash": True},
+    {'field': 'away', 'headerName': '', "cellRenderer": "AwayRenderer", "enableCellChangeFlash": True},
 ]
 default_col_def_fixtures = {"width": 200, "cellStyle": {"textAlign": "center"}, "headerClass": "center-header", "resizable": False}
 dash_grid_options_fixtures = {
