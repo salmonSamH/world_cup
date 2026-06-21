@@ -261,7 +261,7 @@ app.layout = html.Div([
             html.Div(className="bracket", children=[
                 html.Div(id="round-of-32", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                         html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
                     ]) for m in ROUNDS[0]['matches']
                 ]),
                 html.Div(children=[
@@ -304,7 +304,7 @@ app.layout = html.Div([
                 ],id="32-to-16-after", className="connector-column"),
                 html.Div(id="round-of-16", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
                     ]) for m in ROUNDS[1]['matches']
                 ]),
                 html.Div(children=[
@@ -331,7 +331,7 @@ app.layout = html.Div([
                 ],id="16-to-quarters-after", className="connector-column"),
                 html.Div(id="quarterfinals", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
                     ]) for m in ROUNDS[2]['matches']
                 ]),
                 html.Div(children=[
@@ -350,7 +350,7 @@ app.layout = html.Div([
                 ],id="quarters-to-semis-after", className="connector-column"),
                 html.Div(id="semifinals", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(m["team1"]), html.Div(m["team2"]), html.Div(m["info"])
+                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
                     ]) for m in ROUNDS[3]['matches']
                 ]),
                 html.Div(children=[
@@ -366,10 +366,10 @@ app.layout = html.Div([
                 html.Div(id="finals", className="round", children=[
                     html.Div(className="match-dummy"),
                     html.Div(className="match", children=[
-                        html.Div(ROUNDS[4]['matches'][0]["team1"]), html.Div(ROUNDS[4]['matches'][0]["team2"]), html.Div(ROUNDS[4]['matches'][0]["info"])
+                        html.Div(children = ROUNDS[4]['matches'][0]["team1"], className="home"), html.Div(children = ROUNDS[4]['matches'][0]["team2"], className="away"), html.Div(children = ROUNDS[4]['matches'][0]["info"], className="info")
                     ]),
                     html.Div(className="match", children=[
-                        html.Div(ROUNDS[5]['matches'][0]["team1"]), html.Div(ROUNDS[5]['matches'][0]["team2"]), html.Div(ROUNDS[5]['matches'][0]["info"])
+                        html.Div(children = ROUNDS[5]['matches'][0]["team1"], className="home"), html.Div(children = ROUNDS[5]['matches'][0]["team2"], className="away"), html.Div(children = ROUNDS[5]['matches'][0]["info"], className="info")
                     ])
                 ])
             ])

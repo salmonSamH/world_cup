@@ -107,3 +107,19 @@ body {
   height: calc(50% + 3px);
   background: #aaa;
 }
+
+.match {
+  display: grid;
+  /* Creates 2 equal columns. Adjust '1fr 1fr' to change column widths */
+  grid-template-columns: 3fr 1fr; 
+  /* Creates 2 rows that automatically size to fit their content */
+  grid-template-rows: auto auto; 
+  gap: 10px; /* Adds space between your columns and rows */
+  align-items: center;
+}
+
+.info {
+  /* Forces the right column to span from row line 1 to row line 3 */
+  grid-row: 1/3; 
+  grid-column: 2/4;
+}
