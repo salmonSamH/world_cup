@@ -76,51 +76,50 @@ ADDED = False
 # ── Background worker ──────────────────────────────────────────────
 def fetch_and_process():
     while True:
-        try:
-            response = requests.get(url = 'https://v3.football.api-sports.io/standings', headers = headers, params = payload)
-            standings = response.json().get('response')[0].get('league').get('standings')
-            t8_3rd = pd.json_normalize(standings[-1][:-4])
+        response = requests.get(url = 'https://v3.football.api-sports.io/standings', headers = headers, params = payload)
+        standings = response.json().get('response')[0].get('league').get('standings')
+        t8_3rd = pd.json_normalize(standings[-1][:-4])
 
-            standings_rows = []
+        standings_rows = []
 
-            for idx, standing in enumerate(standings[:-1]):
-                table = pd.json_normalize(standing).set_index('rank')
-                table['advances'] = (table.index <= 2) | (table['team.id'].isin(t8_3rd["team.id"]))
-                table['form'] = table['form'].apply(lambda x: x[:5][::-1] + (5 - len(x)) * 'N')
-                table = table[['advances', 'team.id', 'team.logo', 'team.name', 'all.played', 'all.win', 'all.draw', 'all.lose', 'all.goals.for', 'all.goals.against', 'goalsDiff', 'points', 'form']]
-                table.columns = ['advances', 'id', 'logo', 'team', 'played', 'win', 'draw', 'lose', 'goalsFor', 'goalsAgainst', 'goalsDiff', 'points', 'form']
-                table['group'] = string.ascii_uppercase[idx]
-                table = table.to_dict('records')
-                standings_rows.append(table)
+        for idx, standing in enumerate(standings[:-1]):
+            table = pd.json_normalize(standing).set_index('rank')
+            table['advances'] = (table.index <= 2) | (table['team.id'].isin(t8_3rd["team.id"]))
+            table['form'] = table['form'].apply(lambda x: x[:5][::-1] + (5 - len(x)) * 'N')
+            table = table[['advances', 'team.id', 'team.logo', 'team.name', 'all.played', 'all.win', 'all.draw', 'all.lose', 'all.goals.for', 'all.goals.against', 'goalsDiff', 'points', 'form']]
+            table.columns = ['advances', 'id', 'logo', 'team', 'played', 'win', 'draw', 'lose', 'goalsFor', 'goalsAgainst', 'goalsDiff', 'points', 'form']
+            table['group'] = string.ascii_uppercase[idx]
+            table = table.to_dict('records')
+            standings_rows.append(table)
 
-            teams = pd.json_normalize([team for group in standings_rows for team in group]).set_index('id')
+        teams = pd.json_normalize([team for group in standings_rows for team in group]).set_index('id')
 
-            response = requests.get(url = 'https://v3.football.api-sports.io/fixtures', headers = headers, params = payload)
-            fixtures = pd.json_normalize(response.json().get("response"))
-            fixtures = fixtures[['fixture.id', 'fixture.timestamp', 'fixture.venue.name', 'fixture.venue.city', 'fixture.status.long', 'fixture.status.short', 'fixture.status.elapsed', 'fixture.status.extra', 'league.name', 'league.round', 'teams.home.id', 'teams.home.name', 'teams.home.logo', 'teams.away.id', 'teams.away.name', 'teams.away.logo', 'goals.home', 'goals.away']]
-            fixtures.columns = ['id','timestamp', 'venue', 'city', 'status_long', 'status_short', 'elapsed', 'extra', 'league', 'round', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals']
-            fixtures = fixtures.sort_values('timestamp').reset_index(drop=True)
-            fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%Y-%m-%d'))
-            fixtures['time'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%H:%M'))
-            fixtures['score'] = fixtures.apply(lambda x: str(round(x['home_goals'])) + ' - ' + str(round(x['away_goals'])) if pd.notna(x['home_goals']) and pd.notna(x['away_goals']) else None, axis=1)
-            fixtures['city'] = fixtures['city'].apply(lambda x: x if x not in venues.keys() else venues[x])
-            fixtures['round'] = fixtures['round'].apply(lambda x: x if x not in rounds.keys() else rounds[x])
-            fixtures['group'] = fixtures['home_id'].apply(lambda x: teams.loc[x, 'group'])
-            fixtures['round'] = fixtures.apply(lambda x: x['round'] if pd.isna(x['group']) or 'Stage' not in x['round'] else 'Group ' + x['group'] + ', ' + x['round'], axis = 1)
-            fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
-            fixtures['status'] = fixtures.apply(lambda x: x['status'] + " + " + str(round(x['extra'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] and pd.notna(x['extra']) else x['status'], axis = 1)
-            fixtures = fixtures.astype(object).where(pd.notnull(fixtures), None)
-            fixtures_records = fixtures.to_dict('records')
+        response = requests.get(url = 'https://v3.football.api-sports.io/fixtures', headers = headers, params = payload)
+        fixtures = pd.json_normalize(response.json().get("response"))
+        fixtures = fixtures[['fixture.id', 'fixture.timestamp', 'fixture.venue.name', 'fixture.venue.city', 'fixture.status.long', 'fixture.status.short', 'fixture.status.elapsed', 'fixture.status.extra', 'league.name', 'league.round', 'teams.home.id', 'teams.home.name', 'teams.home.logo', 'teams.away.id', 'teams.away.name', 'teams.away.logo', 'goals.home', 'goals.away']]
+        fixtures.columns = ['id','timestamp', 'venue', 'city', 'status_long', 'status_short', 'elapsed', 'extra', 'league', 'round', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals']
+        fixtures = fixtures.sort_values('timestamp').reset_index(drop=True)
+        fixtures['date'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%Y-%m-%d'))
+        fixtures['time'] = fixtures['timestamp'].apply(lambda x: datetime.datetime.fromtimestamp(x).astimezone(ZoneInfo("America/Los_Angeles")).strftime('%H:%M'))
+        fixtures['score'] = fixtures.apply(lambda x: str(round(x['home_goals'])) + ' - ' + str(round(x['away_goals'])) if pd.notna(x['home_goals']) and pd.notna(x['away_goals']) else None, axis=1)
+        fixtures['city'] = fixtures['city'].apply(lambda x: x if x not in venues.keys() else venues[x])
+        fixtures['round'] = fixtures['round'].apply(lambda x: x if x not in rounds.keys() else rounds[x])
+        fixtures['group'] = fixtures['home_id'].apply(lambda x: str(teams.loc[x, 'group']))
+        fixtures['round'] = fixtures.apply(lambda x: x['round'] if 'Stage' not in x['round'] else 'Group ' + x['group'] + ', ' + x['round'], axis = 1)
+        fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
+        fixtures['status'] = fixtures.apply(lambda x: x['status'] + " + " + str(round(x['extra'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] and pd.notna(x['extra']) else x['status'], axis = 1)
+        fixtures = fixtures.astype(object).where(pd.notnull(fixtures), None)
+        fixtures_records = fixtures.to_dict('records')
 
-            first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
-            
-            with cache_lock:
-                cache["standings_rows"] = standings_rows
-                cache["fixtures"] = fixtures_records
-                cache["first_upcoming"] = first_upcoming
-                cache["last_updated"] = time.time()
-        except Exception as e:
-            print(f"Worker error: {e}", flush = True)
+        # print(fixtures['group'].unique())
+
+        first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
+        
+        with cache_lock:
+            cache["standings_rows"] = standings_rows
+            cache["fixtures"] = fixtures_records
+            cache["first_upcoming"] = first_upcoming
+            cache["last_updated"] = time.time()
 
         time.sleep(60)  # poll interval
 
@@ -261,8 +260,53 @@ app.layout = html.Div([
             html.Div(className="bracket", children=[
                 html.Div(id="round-of-32", className="round", children=[
                     html.Div(className="match", children=[
-                         html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
-                    ]) for m in ROUNDS[0]['matches']
+                         html.Div(children = [], className="home", id="home-74"), html.Div(children = [], className="away", id="away-74"), html.Div(children = [], className="info", id="info-74"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-77"), html.Div(children = [], className="away", id="away-77"), html.Div(children = [], className="info", id="info-77"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-73"), html.Div(children = [], className="away", id="away-73"), html.Div(children = [], className="info", id="info-73"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-75"), html.Div(children = [], className="away", id="away-75"), html.Div(children = [], className="info", id="info-75"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-83"), html.Div(children = [], className="away", id="away-83"), html.Div(children = [], className="info", id="info-83"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-84"), html.Div(children = [], className="away", id="away-84"), html.Div(children = [], className="info", id="info-84"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-81"), html.Div(children = [], className="away", id="away-81"), html.Div(children = [], className="info", id="info-81"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-82"), html.Div(children = [], className="away", id="away-82"), html.Div(children = [], className="info", id="info-82"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-76"), html.Div(children = [], className="away", id="away-76"), html.Div(children = [], className="info", id="info-76"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-78"), html.Div(children = [], className="away", id="away-78"), html.Div(children = [], className="info", id="info-78"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-79"), html.Div(children = [], className="away", id="away-79"), html.Div(children = [], className="info", id="info-79"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-80"), html.Div(children = [], className="away", id="away-80"), html.Div(children = [], className="info", id="info-80"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-86"), html.Div(children = [], className="away", id="away-86"), html.Div(children = [], className="info", id="info-86"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-88"), html.Div(children = [], className="away", id="away-88"), html.Div(children = [], className="info", id="info-88"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-85"), html.Div(children = [], className="away", id="away-85"), html.Div(children = [], className="info", id="info-85"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-87"), html.Div(children = [], className="away", id="away-87"), html.Div(children = [], className="info", id="info-87")
+                    ]) 
                 ]),
                 html.Div(children=[
                     html.Div(className="connector"),
@@ -304,8 +348,29 @@ app.layout = html.Div([
                 ],id="32-to-16-after", className="connector-column"),
                 html.Div(id="round-of-16", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
-                    ]) for m in ROUNDS[1]['matches']
+                         html.Div(children = [], className="home", id="home-89"), html.Div(children = [], className="away", id="away-89"), html.Div(children = [], className="info", id="info-89"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-90"), html.Div(children = [], className="away", id="away-90"), html.Div(children = [], className="info", id="info-90"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-93"), html.Div(children = [], className="away", id="away-93"), html.Div(children = [], className="info", id="info-93"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-94"), html.Div(children = [], className="away", id="away-94"), html.Div(children = [], className="info", id="info-94"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-91"), html.Div(children = [], className="away", id="away-91"), html.Div(children = [], className="info", id="info-91"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-92"), html.Div(children = [], className="away", id="away-92"), html.Div(children = [], className="info", id="info-92"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-95"), html.Div(children = [], className="away", id="away-95"), html.Div(children = [], className="info", id="info-95"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-96"), html.Div(children = [], className="away", id="away-96"), html.Div(children = [], className="info", id="info-96"),
+                    ])
                 ]),
                 html.Div(children=[
                     html.Div(className="connector"),
@@ -331,8 +396,17 @@ app.layout = html.Div([
                 ],id="16-to-quarters-after", className="connector-column"),
                 html.Div(id="quarterfinals", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
-                    ]) for m in ROUNDS[2]['matches']
+                         html.Div(children = [], className="home", id="home-97"), html.Div(children = [], className="away", id="away-97"), html.Div(children = [], className="info", id="info-97"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-98"), html.Div(children = [], className="away", id="away-98"), html.Div(children = [], className="info", id="info-98"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-99"), html.Div(children = [], className="away", id="away-99"), html.Div(children = [], className="info", id="info-99"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-100"), html.Div(children = [], className="away", id="away-100"), html.Div(children = [], className="info", id="info-100"),
+                    ]),
                 ]),
                 html.Div(children=[
                     html.Div(className="connector"),
@@ -350,8 +424,11 @@ app.layout = html.Div([
                 ],id="quarters-to-semis-after", className="connector-column"),
                 html.Div(id="semifinals", className="round", children=[
                     html.Div(className="match", children=[
-                        html.Div(children = m["team1"], className="home"), html.Div(children = m["team2"], className="away"), html.Div(children = m["info"], className="info")
-                    ]) for m in ROUNDS[3]['matches']
+                         html.Div(children = [], className="home", id="home-101"), html.Div(children = [], className="away", id="away-101"), html.Div(children = [], className="info", id="info-101"),
+                    ]),
+                    html.Div(className="match", children=[
+                         html.Div(children = [], className="home", id="home-102"), html.Div(children = [], className="away", id="away-102"), html.Div(children = [], className="info", id="info-102"),
+                    ]),
                 ]),
                 html.Div(children=[
                     html.Div(className="connector"),
@@ -366,11 +443,11 @@ app.layout = html.Div([
                 html.Div(id="finals", className="round", children=[
                     html.Div(className="match-dummy"),
                     html.Div(className="match", children=[
-                        html.Div(children = ROUNDS[4]['matches'][0]["team1"], className="home"), html.Div(children = ROUNDS[4]['matches'][0]["team2"], className="away"), html.Div(children = ROUNDS[4]['matches'][0]["info"], className="info")
+                         html.Div(children = [], className="home", id="home-104"), html.Div(children = [], className="away", id="away-104"), html.Div(children = [], className="info", id="info-104"),
                     ]),
                     html.Div(className="match", children=[
-                        html.Div(children = ROUNDS[5]['matches'][0]["team1"], className="home"), html.Div(children = ROUNDS[5]['matches'][0]["team2"], className="away"), html.Div(children = ROUNDS[5]['matches'][0]["info"], className="info")
-                    ])
+                         html.Div(children = [], className="home", id="home-103"), html.Div(children = [], className="away", id="away-103"), html.Div(children = [], className="info", id="info-103"),
+                    ]),
                 ])
             ])
         ]),
@@ -406,6 +483,102 @@ app.layout = html.Div([
     Output("group-j-data", "data"),
     Output("group-k-data", "data"),
     Output("group-l-data", "data"),
+    Output("home-74", "children"),
+    Output("away-74", "children"),
+    Output("info-74", "children"),
+    Output("home-77", "children"),
+    Output("away-77", "children"),
+    Output("info-77", "children"),
+    Output("home-73", "children"),
+    Output("away-73", "children"),
+    Output("info-73", "children"),
+    Output("home-75", "children"),
+    Output("away-75", "children"),
+    Output("info-75", "children"),
+    Output("home-83", "children"),
+    Output("away-83", "children"),
+    Output("info-83", "children"),
+    Output("home-84", "children"),
+    Output("away-84", "children"),
+    Output("info-84", "children"),
+    Output("home-81", "children"),
+    Output("away-81", "children"),
+    Output("info-81", "children"),
+    Output("home-82", "children"),
+    Output("away-82", "children"),
+    Output("info-82", "children"),
+    Output("home-76", "children"),
+    Output("away-76", "children"),
+    Output("info-76", "children"),
+    Output("home-78", "children"),
+    Output("away-78", "children"),
+    Output("info-78", "children"),
+    Output("home-79", "children"),
+    Output("away-79", "children"),
+    Output("info-79", "children"),
+    Output("home-80", "children"),
+    Output("away-80", "children"),
+    Output("info-80", "children"),
+    Output("home-86", "children"),
+    Output("away-86", "children"),
+    Output("info-86", "children"),
+    Output("home-88", "children"),
+    Output("away-88", "children"),
+    Output("info-88", "children"),
+    Output("home-85", "children"),
+    Output("away-85", "children"),
+    Output("info-85", "children"),
+    Output("home-87", "children"),
+    Output("away-87", "children"),
+    Output("info-87", "children"),
+    Output("home-89", "children"),
+    Output("away-89", "children"),
+    Output("info-89", "children"),
+    Output("home-90", "children"),
+    Output("away-90", "children"),
+    Output("info-90", "children"),
+    Output("home-93", "children"),
+    Output("away-93", "children"),
+    Output("info-93", "children"),
+    Output("home-94", "children"),
+    Output("away-94", "children"),
+    Output("info-94", "children"),
+    Output("home-91", "children"),
+    Output("away-91", "children"),
+    Output("info-91", "children"),
+    Output("home-92", "children"),
+    Output("away-92", "children"),
+    Output("info-92", "children"),
+    Output("home-95", "children"),
+    Output("away-95", "children"),
+    Output("info-95", "children"),
+    Output("home-96", "children"),
+    Output("away-96", "children"),
+    Output("info-96", "children"),
+    Output("home-97", "children"),
+    Output("away-97", "children"),
+    Output("info-97", "children"),
+    Output("home-98", "children"),
+    Output("away-98", "children"),
+    Output("info-98", "children"),
+    Output("home-99", "children"),
+    Output("away-99", "children"),
+    Output("info-99", "children"),
+    Output("home-100", "children"),
+    Output("away-100", "children"),
+    Output("info-100", "children"),
+    Output("home-101", "children"),
+    Output("away-101", "children"),
+    Output("info-101", "children"),
+    Output("home-102", "children"),
+    Output("away-102", "children"),
+    Output("info-102", "children"),
+    Output("home-103", "children"),
+    Output("away-103", "children"),
+    Output("info-103", "children"),
+    Output("home-104", "children"),
+    Output("away-104", "children"),
+    Output("info-104", "children"),
     Input("tick", "n_intervals"),
     State("fixtures-rows", "data"),
     State("group-a-data", "data"),
@@ -436,7 +609,9 @@ def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
                 waiting_text = "Still waiting for first update..."
             else:
                 still_waiting = True
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, waiting_text, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
+            result = [no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, waiting_text, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update]
+            result.extend([no_update] * 96)
+            return tuple(result)
         
         last_updated = f"Last updated: {time.strftime('%H:%M:%S', time.localtime(ts))} UTC"
         
@@ -452,7 +627,12 @@ def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
         if len(to_add) == 0 and len(to_update) == 0:
             fixtures_update = dash.no_update
 
-        return fixtures_update, updates(a, standings_rows[0]), updates(b, standings_rows[1]), updates(c, standings_rows[2]), updates(d, standings_rows[3]), updates(e, standings_rows[4]), updates(f, standings_rows[5]), updates(g, standings_rows[6]), updates(h, standings_rows[7]), updates(i, standings_rows[8]), updates(j, standings_rows[9]), updates(k, standings_rows[10]), updates(l, standings_rows[11]), last_updated, fixtures, standings_rows[0], standings_rows[1], standings_rows[2], standings_rows[3], standings_rows[4], standings_rows[5], standings_rows[6], standings_rows[7], standings_rows[8], standings_rows[9], standings_rows[10], standings_rows[11]
+        knockout_fixtures = pd.DataFrame.from_records(fixtures).reindex(index = [74, 77, 73, 75, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87, 89, 90, 93, 94, 91, 92, 95, 96, 97, 98, 99, 100, 101, 102, 104, 103], columns = ['id', 'date', 'time', 'city', 'round', 'status', 'home_id', 'home', 'home_logo', 'away_id', 'away', 'away_logo', 'home_goals', 'away_goals'])
+        print(knockout_fixtures)
+
+        result = [fixtures_update, updates(a, standings_rows[0]), updates(b, standings_rows[1]), updates(c, standings_rows[2]), updates(d, standings_rows[3]), updates(e, standings_rows[4]), updates(f, standings_rows[5]), updates(g, standings_rows[6]), updates(h, standings_rows[7]), updates(i, standings_rows[8]), updates(j, standings_rows[9]), updates(k, standings_rows[10]), updates(l, standings_rows[11]), last_updated, fixtures, standings_rows[0], standings_rows[1], standings_rows[2], standings_rows[3], standings_rows[4], standings_rows[5], standings_rows[6], standings_rows[7], standings_rows[8], standings_rows[9], standings_rows[10], standings_rows[11]]
+        result.extend(["TBD"] * 96)
+        return tuple(result)
     except Exception as e:
         import traceback
         print(traceback.format_exc())   # shows in server logs
@@ -474,4 +654,3 @@ def updates(old, new):
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
