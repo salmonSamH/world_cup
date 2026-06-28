@@ -9,7 +9,6 @@ import datetime
 from dotenv import load_dotenv
 from zoneinfo import ZoneInfo
 import os
-from IPython.display import display, HTML
 # app.py, callbacks.py, background.py — all import from the same place
 from state import cache, cache_lock
 
