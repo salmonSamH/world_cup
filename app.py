@@ -519,14 +519,14 @@ def refresh_grids(n, previous_rows, a, b, c, d, e, f, g, h, i, j, k, l):
             temp = []
             home_score = "" 
             if not pd.isna(row.home_goals):
-                home_score += str(row.home_goals) 
+                home_score += str(int(row.home_goals))
                 if not pd.isna(row.home_penalties):
-                    home_score += " (" + str(row.home_penalties) + ")"
+                    home_score += " (" + str(int(row.home_penalties)) + ")"
             away_score = "" 
             if not pd.isna(row.away_goals):
-                away_score += str(row.away_goals) 
+                away_score += str(int(row.away_goals))
                 if not pd.isna(row.away_penalties):
-                    away_score += " (" + str(row.away_penalties) + ")"
+                    away_score += " (" + str(int(row.away_penalties)) + ")"
             temp.append(html.Div(children = [html.Div(children = [html.Img(src=row.home_logo,width="20px"), str(row.home_code if pd.notna(row.home_code) else "TBD")], className="team-text"), home_score], className="home"))
             temp.append(html.Div(children = [html.Div(children = [html.Img(src=row.away_logo,width="20px"), str(row.away_code if pd.notna(row.away_code) else "TBD")], className="team-text"), away_score], className="away"))
             temp.append(html.Div(children = [html.Span(row.status, className="info-text")], className="info"))
