@@ -113,7 +113,7 @@ def fetch_and_process():
         fixtures['home_code'] = fixtures['home_id'].apply(lambda x: str(team_ids.loc[x, 'team.code']))
         fixtures['away_code'] = fixtures['away_id'].apply(lambda x: str(team_ids.loc[x, 'team.code']))
         fixtures['round'] = fixtures.apply(lambda x: x['round'] if 'Stage' not in x['round'] else 'Group ' + x['group'] + ', ' + x['round'], axis = 1)
-        fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
+        fixtures['status'] = fixtures.apply(lambda x: x['status_short'] + " " + str(round(x['elapsed'])) + "'" if pd.notna(x['elapsed']) and x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] else x['status_short'], axis = 1)
         fixtures['status'] = fixtures.apply(lambda x: x['status'] + " + " + str(round(x['extra'])) + "'" if x['status_short'] in ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT'] and pd.notna(x['extra']) else x['status'], axis = 1)
         fixtures = fixtures.astype(object).where(pd.notnull(fixtures), None)
         fixtures.index = range(1, len(fixtures) + 1)
