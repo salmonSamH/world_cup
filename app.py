@@ -121,7 +121,7 @@ def fetch_and_process():
         fixtures_records = fixtures.to_dict('records')
 
         # print(fixtures['group'].unique())
-        first_upcoming = max(fixtures[fixtures['status_short'] != 'FT'].index.min() - 4, 0)
+        first_upcoming = max(fixtures[(fixtures['status_short'] != 'FT') & (fixtures['status_short'] != 'PEN') & (fixtures['status_short'] != 'AET')].index.min() - 4, 0)
         # print(fixtures.head())
         
         with cache_lock:
