@@ -54,7 +54,7 @@ dash_grid_options = {
     "suppressFieldDotNotation": True,
 }
 style = {"height": None}
-venues = {"East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
+venues = {"Zapopan": "Guadalajara", "New-York": "New York New Jersey", "East Rutherford": "New York New Jersey", "Miami Gardens": "Miami", "Arlington": "Dallas", "Santa Clara": "San Francisco Bay Area", "San-Francisco": "San Francisco Bay Area", "Inglewood": "Los Angeles"}
 rounds = {"Group Stage - 1": "First Stage", "Group Stage - 2": "Second Stage", "Group Stage - 3": "Third Stage"}
 column_defs_fixtures = [
     {'field': 'date', 'headerName': 'Date', "width": 120},
